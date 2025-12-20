@@ -1,0 +1,31 @@
+using System.ComponentModel;
+using System.Dynamic;
+using UnityEngine;
+public class Hand : MonoBehaviour
+{
+    private IItem _item;
+
+    public void TakeItem(IItem item)
+    {
+        if(!IsEmpty()) return;
+
+        this._item = item;
+        item.OnTake(transform);
+    }
+    public void DropItem()
+    {
+        if(_item == null) return;
+
+        Vector3 dropPosition = transform.position;
+        _item.OnDrop(dropPosition);
+        _item = null;
+    }
+    public IItem getItem()
+    {
+        return _item;
+    }
+    public bool IsEmpty()
+    {
+        return _item == null;
+    }
+}
