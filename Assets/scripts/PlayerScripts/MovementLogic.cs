@@ -10,6 +10,7 @@ public class MovementLogic : MonoBehaviour
     [SerializeField] Hand leftHand;
     [SerializeField] Hand rightHand;
     public float checkDistance;
+    public float checkSize;
     public LayerMask interactableLayer;
 
     private GameObject highlightedObject;
@@ -17,12 +18,20 @@ public class MovementLogic : MonoBehaviour
 
     void Update()
     {
+        Camera.main.transform.position = transform.position + new Vector3(0, 0, -10);
         moveInput = new Vector3(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"));
         if (moveInput != Vector3.zero)
             facingDirection = moveInput.normalized;
 
-        RaycastHit2D hit = Physics2D.Raycast(
-            transform.position, 
+        // RaycastHit2D hit = Physics2D.Raycast(
+        //     transform.position, 
+        //     facingDirection, 
+        //     checkDistance, 
+        //     interactableLayer);
+
+        RaycastHit2D hit = Physics2D.CircleCast(
+            transform.position,
+            checkSize, 
             facingDirection, 
             checkDistance, 
             interactableLayer);
@@ -62,8 +71,8 @@ public class MovementLogic : MonoBehaviour
     void Highlight(GameObject obj)
     {
         highlightedObject = obj;
-        marker.gameObject.SetActive(true);
         marker.position = obj.transform.position + obj.gameObject.GetComponent<Renderer>().bounds.extents.y * Vector3.up;
+        marker.gameObject.SetActive(true);
     }
 
     void ClearHighlight()
