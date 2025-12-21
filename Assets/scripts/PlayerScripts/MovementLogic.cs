@@ -44,7 +44,11 @@ public class MovementLogic : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Q))
         {
             DropItem();
-        }  
+        }
+        if (Input.GetKeyDown(KeyCode.F))
+        {
+            EatItem();
+        }
 
         if (hit.collider != null)
         {
@@ -92,7 +96,21 @@ public class MovementLogic : MonoBehaviour
             _highlightedObject = null;
         }
     }
-    
+    private void EatItem()  //якщо в майбутньому буде більше предметів які можна з'їсти, 
+                            // то зробити інтерфейс IEatable і замінити Apple на нього
+    {
+
+        // if(!_leftHand.IsEmpty() && _leftHand.getItem().TryGetComponent<Apple>(out var apple))
+        if(!_leftHand.IsEmpty())
+        {
+            _actualHunger += _leftHand.EatItem();
+        }
+        // else if(!_rightHand.IsEmpty() && _rightHand.getItem().TryGetComponent<Apple>(out var apple))
+        else if(!_rightHand.IsEmpty())
+        {
+            _actualHunger += _rightHand.EatItem();
+        }
+    }
     private void TakeItem(GameObject obj)
     {
         if(obj.TryGetComponent<IItem>(out var item) && !item.IsTaken)

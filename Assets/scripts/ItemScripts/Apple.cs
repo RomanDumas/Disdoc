@@ -5,6 +5,7 @@ public class Apple : MonoBehaviour, IItem
     private Collider2D _collider;
     private Rigidbody2D _rb;
     public int hp { get; private set;}
+    private int _energy = 20;
     private void Awake()
     {
         _collider = GetComponent<Collider2D>();
@@ -50,6 +51,12 @@ public class Apple : MonoBehaviour, IItem
     }
     public void die()
     {
-        // SetActive(false); // потім замінити на метод для телепортації в рандомну точку на карті
+        transform.SetParent(null);// потім замінити на метод для телепортації в рандомну точку на карті
+        transform.position = new Vector3(10,10,10);
+        
+    }
+    public int GetEnergy()
+    {
+        return _energy;
     }
 }
