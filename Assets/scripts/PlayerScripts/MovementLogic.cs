@@ -1,3 +1,5 @@
+using System.Diagnostics;
+using System.Security.Cryptography;
 using UnityEngine;
 
 public class MovementLogic : MonoBehaviour
@@ -5,13 +7,13 @@ public class MovementLogic : MonoBehaviour
     Vector3 moveInput;
     [SerializeField] float Speed;    
     [SerializeField] Transform marker;
+    [SerializeField] Hand leftHand;
+    [SerializeField] Hand rightHand;
     public float checkDistance;
     public LayerMask interactableLayer;
 
     private GameObject highlightedObject;
     private Vector3 facingDirection = Vector3.down; // стартовий напрямок
-
-    
 
     void Update()
     {
@@ -19,11 +21,25 @@ public class MovementLogic : MonoBehaviour
         if (moveInput != Vector3.zero)
             facingDirection = moveInput.normalized;
 
-        RaycastHit2D hit = Physics2D.Raycast(transform.position, facingDirection, checkDistance, interactableLayer);
+        RaycastHit2D hit = Physics2D.Raycast(
+            transform.position, 
+            facingDirection, 
+            checkDistance, 
+            interactableLayer);
+
+        if (Input.GetKeyDown(KeyCode.Q))
+        {
+            DropItem();
+        }  
 
         if (hit.collider != null)
         {
             GameObject obj = hit.collider.gameObject;
+
+            if (Input.GetKeyDown(KeyCode.E))
+            {
+                TakeItem(obj);
+            }
 
             if (highlightedObject != obj)
             {
@@ -36,14 +52,12 @@ public class MovementLogic : MonoBehaviour
             ClearHighlight();
         }
 
+
     }
     private void FixedUpdate()
     {
         transform.position += moveInput * Time.fixedDeltaTime * Speed;
     }
-    public Material outlineMaterial;
-    public Material standartMaterial;
-
 
     void Highlight(GameObject obj)
     {
@@ -60,6 +74,31 @@ public class MovementLogic : MonoBehaviour
             highlightedObject = null;
         }
     }
-
+    
+    private void TakeItem(GameObject obj)
+    {
+        if(obj.TryGetComponent<IItem>(out var item) && !item.IsTaken) // перевірка чи obj IItem
+        {
+            if (rightHand.IsEmpty())
+            {
+                rightHand.TakeItem(item); //дописати логіку слідкування предмету за рукою
+            }
+            else if (leftHand.IsEmpty()) //дописати логіку слідкування предмету за рукою
+            {
+                leftHand.TakeItem(item);
+            }
+        }
+    }
+    private void DropItem()
+    {
+        if (!leftHand.IsEmpty())
+        {
+            leftHand.DropItem();
+        }
+        else if (!rightHand.IsEmpty())
+        {
+            rightHand.DropItem();
+        }
+    }
 }
 
