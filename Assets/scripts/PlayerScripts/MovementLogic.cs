@@ -27,6 +27,10 @@ public class MovementLogic : MonoBehaviour
             checkDistance, 
             interactableLayer);
 
+        if (Input.GetKeyDown(KeyCode.T))
+        {
+            ThrowItem(facingDirection);
+        }
         if (Input.GetKeyDown(KeyCode.Q))
         {
             DropItem();
@@ -98,6 +102,17 @@ public class MovementLogic : MonoBehaviour
         else if (!rightHand.IsEmpty())
         {
             rightHand.DropItem();
+        }
+    }
+    private void ThrowItem(Vector3 directionToThrow)
+    {
+        if (!leftHand.IsEmpty())
+        {
+            leftHand.ThrowItem(directionToThrow);
+        }
+        else if (!rightHand.IsEmpty())
+        {
+            rightHand.ThrowItem(directionToThrow);
         }
     }
 }

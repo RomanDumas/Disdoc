@@ -20,6 +20,15 @@ public class Hand : MonoBehaviour
         _item.OnDrop(dropPosition);
         _item = null;
     }
+    public void ThrowItem(Vector3 directionToThrow)
+    {
+        if(_item == null) return;
+
+        Vector3 dropPosition = transform.position;
+        _item.OnThrow(dropPosition, directionToThrow);
+        _item = null;
+
+    }
     public IItem getItem()
     {
         return _item;
