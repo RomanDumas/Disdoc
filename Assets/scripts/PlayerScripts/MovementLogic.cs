@@ -5,31 +5,41 @@ using UnityEngine;
 public class MovementLogic : MonoBehaviour
 {
     Vector3 moveInput;
-    [SerializeField] float Speed;    
-    [SerializeField] Transform marker;
-    [SerializeField] Hand leftHand;
-    [SerializeField] Hand rightHand;
+    [SerializeField] float _speed;
+    [SerializeField] float _hunger;
+    [SerializeField] Transform _marker;
+    [SerializeField] Hand _leftHand;
+    [SerializeField] Hand _rightHand;
     public float checkDistance;
     public LayerMask interactableLayer;
 
-    private GameObject highlightedObject;
-    private Vector3 facingDirection = Vector3.down; // стартовий напрямок
+    private float _actualHunger;
+    private float _actualSpeed;
 
-    void Update()
+    private GameObject _highlightedObject;
+    private Vector3 _facingDirection = Vector3.down; // стартовий напрямок
+
+    void Awake()
     {
+        _actualHunger = _hunger;
+        _actualSpeed = _speed;
+    }
+    void Update()
+    {  
+        
         moveInput = new Vector3(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"));
         if (moveInput != Vector3.zero)
-            facingDirection = moveInput.normalized;
+            _facingDirection = moveInput.normalized;
 
         RaycastHit2D hit = Physics2D.Raycast(
             transform.position, 
-            facingDirection, 
+            _facingDirection, 
             checkDistance, 
             interactableLayer);
 
         if (Input.GetKeyDown(KeyCode.T))
         {
-            ThrowItem(facingDirection);
+            ThrowItem(_facingDirection);
         }
         if (Input.GetKeyDown(KeyCode.Q))
         {
@@ -45,7 +55,7 @@ public class MovementLogic : MonoBehaviour
                 TakeItem(obj);
             }
 
-            if (highlightedObject != obj)
+            if (_highlightedObject != obj)
             {
                 ClearHighlight();
                 Highlight(obj);
@@ -60,59 +70,95 @@ public class MovementLogic : MonoBehaviour
     }
     private void FixedUpdate()
     {
-        transform.position += moveInput * Time.fixedDeltaTime * Speed;
+        
+        ProcessHungerMechanik();
+        
+        transform.position += moveInput * Time.fixedDeltaTime * _actualSpeed;
+        
     }
 
     void Highlight(GameObject obj)
     {
-        highlightedObject = obj;
-        marker.gameObject.SetActive(true);
-        marker.position = obj.transform.position + obj.gameObject.GetComponent<Renderer>().bounds.extents.y * Vector3.up;
+        _highlightedObject = obj;
+        _marker.gameObject.SetActive(true);
+        _marker.position = obj.transform.position + obj.gameObject.GetComponent<Renderer>().bounds.extents.y * Vector3.up;
     }
 
     void ClearHighlight()
     {
-        if (highlightedObject != null)
+        if (_highlightedObject != null)
         {
-            marker.gameObject.SetActive(false);
-            highlightedObject = null;
+            _marker.gameObject.SetActive(false);
+            _highlightedObject = null;
         }
     }
     
     private void TakeItem(GameObject obj)
     {
-        if(obj.TryGetComponent<IItem>(out var item) && !item.IsTaken) // перевірка чи obj IItem
+        if(obj.TryGetComponent<IItem>(out var item) && !item.IsTaken)
         {
-            if (rightHand.IsEmpty())
+            if (_rightHand.IsEmpty())
             {
-                rightHand.TakeItem(item); //дописати логіку слідкування предмету за рукою
+                _rightHand.TakeItem(item);
             }
-            else if (leftHand.IsEmpty()) //дописати логіку слідкування предмету за рукою
+            else if (_leftHand.IsEmpty())
             {
-                leftHand.TakeItem(item);
+                _leftHand.TakeItem(item);
             }
         }
     }
     private void DropItem()
     {
-        if (!leftHand.IsEmpty())
+        if (!_leftHand.IsEmpty())
         {
-            leftHand.DropItem();
+            _leftHand.DropItem();
         }
-        else if (!rightHand.IsEmpty())
+        else if (!_rightHand.IsEmpty())
         {
-            rightHand.DropItem();
+            _rightHand.DropItem();
         }
     }
     private void ThrowItem(Vector3 directionToThrow)
     {
-        if (!leftHand.IsEmpty())
+        if (!_leftHand.IsEmpty())
         {
-            leftHand.ThrowItem(directionToThrow);
+            _leftHand.ThrowItem(directionToThrow);
         }
-        else if (!rightHand.IsEmpty())
+        else if (!_rightHand.IsEmpty())
         {
-            rightHand.ThrowItem(directionToThrow);
+            _rightHand.ThrowItem(directionToThrow);
+        }
+    }
+    private void ProcessHungerMechanik() //потім коли буде спрінт, зменшувати швидкість спрінта
+    {   
+        //зміна голоду
+        if(!(_actualHunger < 0))
+        {
+            _actualHunger -= 0.1f;  // потім змінити на пдекватне значення, 
+                                    //зараз коофіцієнт спеціально великий, 
+                                    // для того щоб бачити різницю       
+        }
+
+        //зміна швидкості від голоду
+        if(_actualHunger < 0)
+        {
+            _actualSpeed = _speed * 0.2f;
+        }
+        else if(_actualHunger < 20)
+        {
+            _actualSpeed = _speed * 0.4f;
+        }
+        else if(_actualHunger < 40)
+        {
+            _actualSpeed = _speed * 0.6f;
+        }
+        else if(_actualHunger < 60)
+        {
+            _actualSpeed = _speed * 0.8f; 
+        }
+        else
+        {
+            _actualSpeed = _speed;
         }
     }
 }
