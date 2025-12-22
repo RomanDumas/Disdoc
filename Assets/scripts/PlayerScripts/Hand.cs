@@ -4,11 +4,9 @@ using UnityEngine;
 public class Hand : MonoBehaviour
 {
     private IItem _item;
-    public int EatItem()
+    public void DeleteItem()
     {
-        _item.die();
         _item = null;
-        return 20;  //коли появляться нова їжа то додати перевірку
     }
     public void TakeItem(IItem item)
     {

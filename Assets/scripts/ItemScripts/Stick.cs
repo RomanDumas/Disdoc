@@ -1,5 +1,5 @@
 using UnityEngine;
-public class Stick : MonoBehaviour, IItem
+public class Stick : MonoBehaviour, IItem, IBurnable
 {
     public bool IsTaken { get; private set; }
     private Collider2D _collider;
@@ -12,6 +12,18 @@ public class Stick : MonoBehaviour, IItem
         _rb = GetComponent<Rigidbody2D>();
         hp = 3;
     }
+
+    private void FixedUpdate()
+    {
+        _rb.velocity *= 0.98f;
+
+        if (_rb.velocity.magnitude < 0.01f)
+        {
+            _rb.velocity = Vector3.zero;
+            _rb.angularVelocity = 0f;
+        } 
+    }
+    
     public void OnTake(Transform hand)
     {
         IsTaken = true;
@@ -40,6 +52,17 @@ public class Stick : MonoBehaviour, IItem
         if (_rb != null)
             _rb.simulated = true;
     }
+    public void Burn(Bonfire bonfire)
+    {
+        die();
+        bonfire.BurnStick();
+
+        if (_collider != null)
+            _collider.enabled = true;
+
+        if (_rb != null)
+            _rb.simulated = true;
+    }
     public void OnThrow(Vector3 dropPosition, Vector3 directionToThrow)
     {
         OnDrop(dropPosition);
@@ -51,6 +74,8 @@ public class Stick : MonoBehaviour, IItem
     }
     public void die()
     {
-        // SetActive(false); // потім замінити на метод для телепортації в рандомну точку на карті
+        IsTaken = false;
+        transform.SetParent(null);
+        transform.position = new Vector3(10,10,10);// потім замінити на метод для телепортації в рандомну точку на карті
     }
 }

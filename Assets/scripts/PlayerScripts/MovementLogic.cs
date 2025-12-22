@@ -53,7 +53,11 @@ public class MovementLogic : MonoBehaviour
         if (hit.collider != null)
         {
             GameObject obj = hit.collider.gameObject;
-
+            
+            if (Input.GetKeyDown(KeyCode.F))
+            {
+                BurnItem(obj);
+            }
             if (Input.GetKeyDown(KeyCode.E))
             {
                 TakeItem(obj);
@@ -96,21 +100,39 @@ public class MovementLogic : MonoBehaviour
             _highlightedObject = null;
         }
     }
-    private void EatItem()  //якщо в майбутньому буде більше предметів які можна з'їсти, 
-                            // то зробити інтерфейс IEatable і замінити Apple на нього
+    private void BurnItem(GameObject obj)
     {
+        if (!obj.TryGetComponent<Bonfire>(out var bonfire))
+            return;
 
-        // if(!_leftHand.IsEmpty() && _leftHand.getItem().TryGetComponent<Apple>(out var apple))
-        if(!_leftHand.IsEmpty())
+        if (!_leftHand.IsEmpty() && _leftHand.GetItem() is IBurnable burnableL)
         {
-            _actualHunger += _leftHand.EatItem();
-        }
-        // else if(!_rightHand.IsEmpty() && _rightHand.getItem().TryGetComponent<Apple>(out var apple))
-        else if(!_rightHand.IsEmpty())
+            burnableL.Burn(bonfire);
+            _leftHand.DeleteItem();
+        }            
+        else if (!_rightHand.IsEmpty() && _rightHand.GetItem() is IBurnable burnableR)
         {
-            _actualHunger += _rightHand.EatItem();
+            burnableR.Burn(bonfire);
+            _rightHand.DeleteItem();
         }
     }
+
+    private void EatItem()
+    {
+        if (!_leftHand.IsEmpty() && _leftHand.GetItem() is IEatable eatableL)
+        {
+            _actualHunger += eatableL.energy;
+            eatableL.OnEat();
+            _leftHand.DeleteItem();
+        }
+        else if (!_rightHand.IsEmpty() && _rightHand.GetItem() is IEatable eatableR)
+        {
+            _actualHunger += eatableR.energy;
+            eatableR.OnEat();
+            _rightHand.DeleteItem();
+        }
+    }
+
     private void TakeItem(GameObject obj)
     {
         if(obj.TryGetComponent<IItem>(out var item) && !item.IsTaken)
@@ -152,9 +174,7 @@ public class MovementLogic : MonoBehaviour
         //зміна голоду
         if(!(_actualHunger < 0))
         {
-            _actualHunger -= 0.1f;  // потім змінити на пдекватне значення, 
-                                    //зараз коофіцієнт спеціально великий, 
-                                    // для того щоб бачити різницю       
+            _actualHunger -= 0.01f;      
         }
 
         //зміна швидкості від голоду
