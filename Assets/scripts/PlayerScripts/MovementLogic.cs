@@ -11,6 +11,7 @@ public class MovementLogic : MonoBehaviour
     [SerializeField] Hand _leftHand;
     [SerializeField] Hand _rightHand;
     public float checkDistance;
+    public float checkSize;
     public LayerMask interactableLayer;
 
     private float _actualHunger;
