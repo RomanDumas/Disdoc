@@ -1,6 +1,8 @@
 using UnityEngine;
-public class Stick : MonoBehaviour, IItem, IBurnable
+public class Apple : MonoBehaviour, IItem, IEatable
 {
+    [SerializeField] private int _energy = 20;
+    public int energy => _energy;
     public bool IsTaken { get; private set; }
     private Collider2D _collider;
     private Rigidbody2D _rb;
@@ -10,9 +12,8 @@ public class Stick : MonoBehaviour, IItem, IBurnable
     {
         _collider = GetComponent<Collider2D>();
         _rb = GetComponent<Rigidbody2D>();
-        hp = 3;
+        hp = 1;
     }
-
     private void FixedUpdate()
     {
         _rb.velocity *= 0.98f;
@@ -24,6 +25,16 @@ public class Stick : MonoBehaviour, IItem, IBurnable
         } 
     }
     
+    public void OnEat()
+    {
+        die();
+
+        if (_collider != null)
+            _collider.enabled = true;
+
+        if (_rb != null)
+            _rb.simulated = true;
+    }
     public void OnTake(Transform hand)
     {
         IsTaken = true;
@@ -52,21 +63,11 @@ public class Stick : MonoBehaviour, IItem, IBurnable
         if (_rb != null)
             _rb.simulated = true;
     }
-    public void Burn(Bonfire bonfire)
-    {
-        die();
-        bonfire.BurnStick();
-
-        if (_collider != null)
-            _collider.enabled = true;
-
-        if (_rb != null)
-            _rb.simulated = true;
-    }
     public void OnThrow(Vector3 dropPosition, Vector3 directionToThrow)
     {
         OnDrop(dropPosition);
         _rb.velocity = directionToThrow * 10;
+        //добавити перевірку чи предмет зіткнувся з чимось ще, якщо так, то decreaseHp()
     }
     public void decreaseHp()
     {
@@ -77,5 +78,9 @@ public class Stick : MonoBehaviour, IItem, IBurnable
         IsTaken = false;
         transform.SetParent(null);
         transform.position = new Vector3(10,10,10);// потім замінити на метод для телепортації в рандомну точку на карті
+    }
+    public int GetEnergy()
+    {
+        return energy;
     }
 }
