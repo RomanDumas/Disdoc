@@ -4,7 +4,10 @@ using UnityEngine;
 public class Hand : MonoBehaviour
 {
     private IItem _item;
-
+    public void DeleteItem()
+    {
+        _item = null;
+    }
     public void TakeItem(IItem item)
     {
         if(!IsEmpty()) return;
@@ -20,7 +23,16 @@ public class Hand : MonoBehaviour
         _item.OnDrop(dropPosition);
         _item = null;
     }
-    public IItem getItem()
+    public void ThrowItem(Vector3 directionToThrow)
+    {
+        if(_item == null) return;
+
+        Vector3 dropPosition = transform.position;
+        _item.OnThrow(dropPosition, directionToThrow);
+        _item = null;
+
+    }
+    public IItem GetItem()
     {
         return _item;
     }
