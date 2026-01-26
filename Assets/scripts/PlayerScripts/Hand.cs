@@ -10,10 +10,9 @@ public class Hand : MonoBehaviour
     }
     public void TakeItem(IItem item)
     {
-        if(!IsEmpty()) return;
-
         this._item = item;
-        item.OnTake(transform);
+        if(item != null)
+            item.OnTake(transform);
     }
     public void DropItem()
     {
@@ -35,6 +34,10 @@ public class Hand : MonoBehaviour
     public IItem GetItem()
     {
         return _item;
+    }
+    public void SetItem(IItem item)
+    {
+        _item = item;
     }
     public bool IsEmpty()
     {

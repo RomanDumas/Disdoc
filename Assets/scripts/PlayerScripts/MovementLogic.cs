@@ -50,6 +50,10 @@ public class MovementLogic : MonoBehaviour
         {
             EatItem();
         }
+        if (Input.GetKeyDown(KeyCode.R))
+        {
+            SwapItems();
+        }
 
         if (hit.collider != null)
         {
@@ -169,6 +173,12 @@ public class MovementLogic : MonoBehaviour
         {
             _rightHand.ThrowItem(directionToThrow);
         }
+    }
+    private void SwapItems()
+    {
+        IItem temp = _leftHand.GetItem();
+        _leftHand.TakeItem(_rightHand.GetItem());
+        _rightHand.TakeItem(temp);
     }
     private void ProcessHungerMechanik() //потім коли буде спрінт, зменшувати швидкість спрінта
     {   
