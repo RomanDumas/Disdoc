@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.Security.Cryptography;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class MovementLogic : MonoBehaviour
@@ -110,31 +111,31 @@ public class MovementLogic : MonoBehaviour
         if (!obj.TryGetComponent<Bonfire>(out var bonfire))
             return;
 
-        if (!_leftHand.IsEmpty() && _leftHand.GetItem() is IBurnable burnableL)
+        if (!_leftHand.IsEmpty() && _leftHand.GetLastItem() is IBurnable burnableL)
         {
             burnableL.Burn(bonfire);
-            _leftHand.DeleteItem();
+            _leftHand.RemoveLastItem();
         }            
-        else if (!_rightHand.IsEmpty() && _rightHand.GetItem() is IBurnable burnableR)
+        else if (!_rightHand.IsEmpty() && _rightHand.GetLastItem() is IBurnable burnableR)
         {
             burnableR.Burn(bonfire);
-            _rightHand.DeleteItem();
+            _rightHand.RemoveLastItem();
         }
     }
 
     private void EatItem()
     {
-        if (!_leftHand.IsEmpty() && _leftHand.GetItem() is IEatable eatableL)
+        if (!_leftHand.IsEmpty() && _leftHand.GetLastItem() is IEatable eatableL)
         {
             _actualHunger += eatableL.energy;
             eatableL.OnEat();
-            _leftHand.DeleteItem();
+            _leftHand.RemoveLastItem();
         }
-        else if (!_rightHand.IsEmpty() && _rightHand.GetItem() is IEatable eatableR)
+        else if (!_rightHand.IsEmpty() && _rightHand.GetLastItem() is IEatable eatableR)
         {
             _actualHunger += eatableR.energy;
             eatableR.OnEat();
-            _rightHand.DeleteItem();
+            _rightHand.RemoveLastItem();
         }
     }
 
@@ -142,11 +143,19 @@ public class MovementLogic : MonoBehaviour
     {
         if(obj.TryGetComponent<IItem>(out var item) && !item.IsTaken)
         {
-            if (_rightHand.IsEmpty())
+            if (_rightHand.IsEmpty() && !_rightHand.isFull())
             {
                 _rightHand.TakeItem(item);
             }
-            else if (_leftHand.IsEmpty())
+            else if(_rightHand.CanBeTaken(item) && !_rightHand.isFull())
+            {
+                _rightHand.TakeItem(item);
+            }
+            else if (_leftHand.IsEmpty() && !_leftHand.isFull())
+            {
+                _leftHand.TakeItem(item);
+            }
+            else if(_leftHand.CanBeTaken(item) && !_leftHand.isFull())
             {
                 _leftHand.TakeItem(item);
             }
@@ -176,11 +185,21 @@ public class MovementLogic : MonoBehaviour
     }
     private void SwapItems()
     {
-        IItem temp = _leftHand.GetItem();
-        _leftHand.TakeItem(_rightHand.GetItem());
-        _rightHand.TakeItem(temp);
+        List<IItem> rightItems = new List<IItem>(_rightHand.GetItemList());
+        List<IItem> leftItems = new List<IItem>(_leftHand.GetItemList());
+
+        replaceItemList(_leftHand, rightItems);
+        replaceItemList(_rightHand, leftItems);
     }
-    private void ProcessHungerMechanik() //потім коли буде спрінт, зменшувати швидкість спрінта
+    private void replaceItemList(Hand hand, List<IItem> items)
+    {
+        hand.clearItemList();
+        foreach (IItem item in items)
+        {
+            hand.TakeItem(item);
+        }
+    }
+     private void ProcessHungerMechanik() //потім коли буде спрінт, зменшувати швидкість спрінта
     {   
         //зміна голоду
         if(!(_actualHunger < 0))
